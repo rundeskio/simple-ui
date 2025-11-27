@@ -10,8 +10,8 @@ class RundeskioAPI {
     }
 
     loadConfig() {
-        this.workApiUrl = localStorage.getItem('work-api-url') || 'http://localhost:8001/api/v1';
-        this.commsApiUrl = localStorage.getItem('comms-api-url') || 'http://localhost:8002/api/v1';
+        this.workApiUrl = localStorage.getItem('work-api-url') || 'http://localhost:8001';
+        this.commsApiUrl = localStorage.getItem('comms-api-url') || 'http://localhost:8002';
         this.orgId = localStorage.getItem('org-id') || '1';
         this.userId = localStorage.getItem('user-id') || '1';
     }
@@ -78,29 +78,29 @@ class RundeskioAPI {
 
     // Workspaces
     async listWorkspaces(skip = 0, limit = 50) {
-        return this.request('work', `/workspaces?skip=${skip}&limit=${limit}`);
+        return this.request('work', `/v1/workspaces?skip=${skip}&limit=${limit}`);
     }
 
     async createWorkspace(data) {
-        return this.request('work', '/workspaces', {
+        return this.request('work', '/v1/workspaces', {
             method: 'POST',
             body: JSON.stringify(data)
         });
     }
 
     async getWorkspace(workspaceId) {
-        return this.request('work', `/workspaces/${workspaceId}`);
+        return this.request('work', `/v1/workspaces/${workspaceId}`);
     }
 
     async updateWorkspace(workspaceId, data) {
-        return this.request('work', `/workspaces/${workspaceId}`, {
+        return this.request('work', `/v1/workspaces/${workspaceId}`, {
             method: 'PUT',
             body: JSON.stringify(data)
         });
     }
 
     async deleteWorkspace(workspaceId) {
-        return this.request('work', `/workspaces/${workspaceId}`, {
+        return this.request('work', `/v1/workspaces/${workspaceId}`, {
             method: 'DELETE'
         });
     }
@@ -116,32 +116,32 @@ class RundeskioAPI {
 
         const queryString = params.toString();
         const endpoint = workspaceId
-            ? `/workspaces/${workspaceId}/tasks?${queryString}`
-            : `/tasks?${queryString}`;
+            ? `/v1/workspaces/${workspaceId}/tasks?${queryString}`
+            : `/v1/tasks?${queryString}`;
 
         return this.request('work', endpoint);
     }
 
     async createTask(workspaceId, data) {
-        return this.request('work', `/workspaces/${workspaceId}/tasks`, {
+        return this.request('work', `/v1/workspaces/${workspaceId}/tasks`, {
             method: 'POST',
             body: JSON.stringify(data)
         });
     }
 
     async getTask(workspaceId, taskId) {
-        return this.request('work', `/workspaces/${workspaceId}/tasks/${taskId}`);
+        return this.request('work', `/v1/workspaces/${workspaceId}/tasks/${taskId}`);
     }
 
     async updateTask(workspaceId, taskId, data) {
-        return this.request('work', `/workspaces/${workspaceId}/tasks/${taskId}`, {
+        return this.request('work', `/v1/workspaces/${workspaceId}/tasks/${taskId}`, {
             method: 'PUT',
             body: JSON.stringify(data)
         });
     }
 
     async deleteTask(workspaceId, taskId) {
-        return this.request('work', `/workspaces/${workspaceId}/tasks/${taskId}`, {
+        return this.request('work', `/v1/workspaces/${workspaceId}/tasks/${taskId}`, {
             method: 'DELETE'
         });
     }
@@ -154,29 +154,29 @@ class RundeskioAPI {
         params.append('skip', filters.skip || 0);
         params.append('limit', filters.limit || 50);
 
-        return this.request('work', `/workspaces/${workspaceId}/goals?${params.toString()}`);
+        return this.request('work', `/v1/workspaces/${workspaceId}/goals?${params.toString()}`);
     }
 
     async createGoal(workspaceId, data) {
-        return this.request('work', `/workspaces/${workspaceId}/goals`, {
+        return this.request('work', `/v1/workspaces/${workspaceId}/goals`, {
             method: 'POST',
             body: JSON.stringify(data)
         });
     }
 
     async getGoal(workspaceId, goalId) {
-        return this.request('work', `/workspaces/${workspaceId}/goals/${goalId}`);
+        return this.request('work', `/v1/workspaces/${workspaceId}/goals/${goalId}`);
     }
 
     async updateGoal(workspaceId, goalId, data) {
-        return this.request('work', `/workspaces/${workspaceId}/goals/${goalId}`, {
+        return this.request('work', `/v1/workspaces/${workspaceId}/goals/${goalId}`, {
             method: 'PUT',
             body: JSON.stringify(data)
         });
     }
 
     async deleteGoal(workspaceId, goalId) {
-        return this.request('work', `/workspaces/${workspaceId}/goals/${goalId}`, {
+        return this.request('work', `/v1/workspaces/${workspaceId}/goals/${goalId}`, {
             method: 'DELETE'
         });
     }
@@ -187,18 +187,18 @@ class RundeskioAPI {
         params.append('skip', filters.skip || 0);
         params.append('limit', filters.limit || 50);
 
-        return this.request('work', `/workspaces/${workspaceId}/bookmarks?${params.toString()}`);
+        return this.request('work', `/v1/workspaces/${workspaceId}/bookmarks?${params.toString()}`);
     }
 
     async createBookmark(workspaceId, data) {
-        return this.request('work', `/workspaces/${workspaceId}/bookmarks`, {
+        return this.request('work', `/v1/workspaces/${workspaceId}/bookmarks`, {
             method: 'POST',
             body: JSON.stringify(data)
         });
     }
 
     async deleteBookmark(workspaceId, bookmarkId) {
-        return this.request('work', `/workspaces/${workspaceId}/bookmarks/${bookmarkId}`, {
+        return this.request('work', `/v1/workspaces/${workspaceId}/bookmarks/${bookmarkId}`, {
             method: 'DELETE'
         });
     }
