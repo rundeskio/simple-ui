@@ -67,11 +67,31 @@ class RundeskioAPI {
 
     // Health Checks
     async checkWorkHealth() {
-        return this.request('work', '/health');
+        try {
+            const url = `${this.workApiUrl}/health`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('[Health Check] Work API error:', error);
+            throw error;
+        }
     }
 
     async checkCommsHealth() {
-        return this.request('comms', '/health');
+        try {
+            const url = `${this.commsApiUrl}/health`;
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('[Health Check] Comms API error:', error);
+            throw error;
+        }
     }
 
     // ==================== WORK SERVICE ====================
