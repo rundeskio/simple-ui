@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rundeskio - Test Interface</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-dark text-white py-4 mb-4">
+        <div class="container">
+            <h1 class="display-4 mb-0">RUNDESKIO</h1>
+            <p class="lead mb-0">B2B SaaS Productivity Platform - API Test Interface</p>
+        </div>
+    </header>
+
+    <!-- API Status Bar -->
+    <div class="container-fluid mb-3">
+        <div class="alert alert-secondary mb-0" role="alert">
+            <strong>API Status:</strong>
+            <span id="work-api-status" class="ms-3">Work API: <span class="text-muted">Unknown</span></span>
+            <span id="comms-api-status" class="ms-3">Comms API: <span class="text-muted">Unknown</span></span>
+        </div>
+    </div>
+
+    <!-- Main Layout with Sidebar -->
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Sidebar Navigation -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column nav-pills" id="mainNav" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="config-tab" data-bs-toggle="tab" data-bs-target="#config" type="button">
+                                <i class="bi bi-gear"></i> Config
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="workspaces-tab" data-bs-toggle="tab" data-bs-target="#workspaces" type="button">
+                                <i class="bi bi-folder"></i> Workspaces
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tasks" type="button">
+                                <i class="bi bi-check-square"></i> Tasks
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="goals-tab" data-bs-toggle="tab" data-bs-target="#goals" type="button">
+                                <i class="bi bi-bullseye"></i> Goals
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="announcements-tab" data-bs-toggle="tab" data-bs-target="#announcements" type="button">
+                                <i class="bi bi-megaphone"></i> Announcements
+                                <span class="badge bg-secondary text-white ms-2 small">Soon</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="memos-tab" data-bs-toggle="tab" data-bs-target="#memos" type="button">
+                                <i class="bi bi-file-text"></i> Memos
+                                <span class="badge bg-secondary text-white ms-2 small">Soon</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="decisions-tab" data-bs-toggle="tab" data-bs-target="#decisions" type="button">
+                                <i class="bi bi-diagram-3"></i> Decisions
+                                <span class="badge bg-secondary text-white ms-2 small">Soon</span>
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="celebrations-tab" data-bs-toggle="tab" data-bs-target="#celebrations" type="button">
+                                <i class="bi bi-trophy"></i> Celebrations
+                                <span class="badge bg-secondary text-white ms-2 small">Soon</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content Area -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="tab-content" id="mainContent">
+            <!-- Config Section -->
+            <div class="tab-pane fade show active" id="config" role="tabpanel">
+                <h2 class="mb-4">API Configuration</h2>
+
+                <form id="config-form">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">API Endpoints</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="work-api-url" class="form-label">Work Service URL</label>
+                                <input type="text" class="form-control" id="work-api-url" value="http://localhost:8001/api/v1" required>
+                                <div class="form-text text-muted">
+                                    Work service runs in Docker on port 8001
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="comms-api-url" class="form-label">Comms Service URL</label>
+                                <input type="text" class="form-control" id="comms-api-url" value="http://localhost:8002/api/v1" required>
+                                <div class="form-text text-warning">
+                                    <i class="bi bi-exclamation-triangle"></i> Note: Comms service is not yet fully implemented. Only Work Service endpoints are functional.
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="org-id" class="form-label">Organization ID</label>
+                                <input type="text" class="form-control" id="org-id" value="1" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="user-id" class="form-label">User ID</label>
+                                <input type="text" class="form-control" id="user-id" value="1" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Save Configuration</button>
+                            <button type="button" class="btn btn-secondary" onclick="testConnections()">Test Connections</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Quick Start</h5>
+                    </div>
+                    <div class="card-body">
+                        <ol>
+                            <li>Enter your Work Service and Comms Service API URLs</li>
+                            <li>Enter valid Organization ID and User ID</li>
+                            <li>Click "Save Configuration" to store settings</li>
+                            <li>Click "Test Connections" to verify API access</li>
+                            <li>Navigate to other tabs to interact with APIs</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workspaces Section -->
+            <div class="tab-pane fade" id="workspaces" role="tabpanel">
+                <h2 class="mb-4">Workspaces</h2>
+
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="loadWorkspaces()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh List
+                    </button>
+                    <button class="btn btn-success" onclick="showCreateWorkspace()">
+                        <i class="bi bi-plus-circle"></i> Create Workspace
+                    </button>
+                </div>
+
+                <div id="create-workspace-form" style="display:none;" class="mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Create New Workspace</h5>
+                        </div>
+                        <div class="card-body">
+                            <form onsubmit="createWorkspace(event)">
+                                <div class="mb-3">
+                                    <label for="ws-name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="ws-name" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="ws-type" class="form-label">Type</label>
+                                    <select class="form-select" id="ws-type">
+                                        <option value="project">Project</option>
+                                        <option value="team">Team</option>
+                                        <option value="department">Department</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="ws-description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="ws-description" rows="3"></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Create</button>
+                                <button type="button" class="btn btn-secondary" onclick="hideCreateWorkspace()">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Workspaces List</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="workspaces-list">
+                            <p class="text-muted">Click "Refresh List" to load workspaces</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tasks Section -->
+            <div class="tab-pane fade" id="tasks" role="tabpanel">
+                <h2 class="mb-4">Tasks</h2>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Filters</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-6">
+                                <label for="task-workspace-id" class="form-label">Workspace ID</label>
+                                <input type="text" class="form-control" id="task-workspace-id" placeholder="Leave empty for all tasks">
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-primary" onclick="loadTasks()">Load Tasks</button>
+                                <button class="btn btn-success" onclick="showCreateTask()">Create Task</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="create-task-form" style="display:none;" class="mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Create New Task</h5>
+                        </div>
+                        <div class="card-body">
+                            <form onsubmit="createTask(event)">
+                                <div class="mb-3">
+                                    <label for="task-workspace-id-create" class="form-label">Workspace ID</label>
+                                    <input type="text" class="form-control" id="task-workspace-id-create" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="task-title" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="task-title" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="task-description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="task-description" rows="3"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="task-status" class="form-label">Status</label>
+                                    <select class="form-select" id="task-status">
+                                        <option value="todo">To Do</option>
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="task-due-date" class="form-label">Due Date</label>
+                                    <input type="date" class="form-control" id="task-due-date">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Create Task</button>
+                                <button type="button" class="btn btn-secondary" onclick="hideCreateTask()">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Tasks List</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="tasks-list">
+                            <p class="text-muted">Select a workspace and click "Load Tasks"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Goals Section -->
+            <div class="tab-pane fade" id="goals" role="tabpanel">
+                <h2 class="mb-4">Goals</h2>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Filters</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-6">
+                                <label for="goal-workspace-id" class="form-label">Workspace ID</label>
+                                <input type="text" class="form-control" id="goal-workspace-id" required>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-primary" onclick="loadGoals()">Load Goals</button>
+                                <button class="btn btn-success" onclick="showCreateGoal()">Create Goal</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="create-goal-form" style="display:none;" class="mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Create New Goal</h5>
+                        </div>
+                        <div class="card-body">
+                            <form onsubmit="createGoal(event)">
+                                <div class="mb-3">
+                                    <label for="goal-workspace-id-create" class="form-label">Workspace ID</label>
+                                    <input type="text" class="form-control" id="goal-workspace-id-create" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="goal-title" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="goal-title" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="goal-description" class="form-label">Description</label>
+                                    <textarea class="form-control" id="goal-description" rows="3"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="goal-status" class="form-label">Status</label>
+                                    <select class="form-select" id="goal-status">
+                                        <option value="not_started">Not Started</option>
+                                        <option value="in_progress">In Progress</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="on_hold">On Hold</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="goal-target-date" class="form-label">Target Date</label>
+                                    <input type="date" class="form-control" id="goal-target-date">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Create Goal</button>
+                                <button type="button" class="btn btn-secondary" onclick="hideCreateGoal()">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Goals List</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="goals-list">
+                            <p class="text-muted">Enter workspace ID and click "Load Goals"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Announcements Section -->
+            <div class="tab-pane fade" id="announcements" role="tabpanel">
+                <h2 class="mb-4">Announcements</h2>
+
+                <div class="alert alert-info" role="alert">
+                    <i class="bi bi-info-circle"></i> <strong>Coming Soon:</strong> The Communications Service is currently under development. This section will be functional once the service endpoints are implemented.
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Filters</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-6">
+                                <label for="announcement-workspace-id" class="form-label">Workspace ID</label>
+                                <input type="text" class="form-control" id="announcement-workspace-id" required>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-primary" onclick="loadAnnouncements()">Load Announcements</button>
+                                <button class="btn btn-success" onclick="showCreateAnnouncement()">Create Announcement</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="create-announcement-form" style="display:none;" class="mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Create New Announcement</h5>
+                        </div>
+                        <div class="card-body">
+                            <form onsubmit="createAnnouncement(event)">
+                                <div class="mb-3">
+                                    <label for="announcement-workspace-id-create" class="form-label">Workspace ID</label>
+                                    <input type="text" class="form-control" id="announcement-workspace-id-create" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="announcement-title" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="announcement-title" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="announcement-content" class="form-label">Content (HTML)</label>
+                                    <textarea class="form-control" id="announcement-content" rows="5" required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="announcement-priority" class="form-label">Priority</label>
+                                    <select class="form-select" id="announcement-priority">
+                                        <option value="low">Low</option>
+                                        <option value="normal" selected>Normal</option>
+                                        <option value="high">High</option>
+                                        <option value="urgent">Urgent</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="announcement-expires" class="form-label">Expires At</label>
+                                    <input type="datetime-local" class="form-control" id="announcement-expires">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Create Announcement</button>
+                                <button type="button" class="btn btn-secondary" onclick="hideCreateAnnouncement()">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Announcements List</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="announcements-list">
+                            <p class="text-muted">Enter workspace ID and click "Load Announcements"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Memos Section -->
+            <div class="tab-pane fade" id="memos" role="tabpanel">
+                <h2 class="mb-4">Memos</h2>
+
+                <div class="alert alert-info" role="alert">
+                    <i class="bi bi-info-circle"></i> <strong>Coming Soon:</strong> The Communications Service is currently under development. This section will be functional once the service endpoints are implemented.
+                </div>
+
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="loadMemos()">Load Memos</button>
+                    <button class="btn btn-success" onclick="showCreateMemo()">Create Memo</button>
+                </div>
+
+                <div id="create-memo-form" style="display:none;" class="mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Create New Memo</h5>
+                        </div>
+                        <div class="card-body">
+                            <form onsubmit="createMemo(event)">
+                                <div class="mb-3">
+                                    <label for="memo-title" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="memo-title" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="memo-content" class="form-label">Content (HTML)</label>
+                                    <textarea class="form-control" id="memo-content" rows="5" required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="memo-type" class="form-label">Type</label>
+                                    <select class="form-select" id="memo-type">
+                                        <option value="general">General</option>
+                                        <option value="policy">Policy</option>
+                                        <option value="procedure">Procedure</option>
+                                        <option value="update">Update</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="memo-visibility" class="form-label">Visibility</label>
+                                    <select class="form-select" id="memo-visibility">
+                                        <option value="public">Public</option>
+                                        <option value="workspace">Workspace</option>
+                                        <option value="restricted">Restricted</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="memo-effective-date" class="form-label">Effective Date</label>
+                                    <input type="date" class="form-control" id="memo-effective-date">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Create Memo</button>
+                                <button type="button" class="btn btn-secondary" onclick="hideCreateMemo()">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Memos List</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="memos-list">
+                            <p class="text-muted">Click "Load Memos" to view organization memos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Decisions Section -->
+            <div class="tab-pane fade" id="decisions" role="tabpanel">
+                <h2 class="mb-4">Decision Records</h2>
+
+                <div class="alert alert-info" role="alert">
+                    <i class="bi bi-info-circle"></i> <strong>Coming Soon:</strong> The Communications Service is currently under development. This section will be functional once the service endpoints are implemented.
+                </div>
+
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="loadDecisions()">Load Decisions</button>
+                    <button class="btn btn-success" onclick="showCreateDecision()">Create Decision</button>
+                </div>
+
+                <div id="create-decision-form" style="display:none;" class="mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Create New Decision Record</h5>
+                        </div>
+                        <div class="card-body">
+                            <form onsubmit="createDecision(event)">
+                                <div class="mb-3">
+                                    <label for="decision-title" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="decision-title" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="decision-context" class="form-label">Context (Why this decision?)</label>
+                                    <textarea class="form-control" id="decision-context" rows="3" required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="decision-decision" class="form-label">Decision (What was decided?)</label>
+                                    <textarea class="form-control" id="decision-decision" rows="3" required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="decision-consequences" class="form-label">Consequences</label>
+                                    <textarea class="form-control" id="decision-consequences" rows="2"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="decision-alternatives" class="form-label">Alternatives Considered</label>
+                                    <textarea class="form-control" id="decision-alternatives" rows="2"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="decision-status" class="form-label">Status</label>
+                                    <select class="form-select" id="decision-status">
+                                        <option value="proposed">Proposed</option>
+                                        <option value="decided" selected>Decided</option>
+                                        <option value="implemented">Implemented</option>
+                                        <option value="revisited">Revisited</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="decision-decided-date" class="form-label">Decided Date</label>
+                                    <input type="date" class="form-control" id="decision-decided-date">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Create Decision</button>
+                                <button type="button" class="btn btn-secondary" onclick="hideCreateDecision()">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Decision Records List</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="decisions-list">
+                            <p class="text-muted">Click "Load Decisions" to view organization decisions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Celebrations Section -->
+            <div class="tab-pane fade" id="celebrations" role="tabpanel">
+                <h2 class="mb-4">Celebrations</h2>
+
+                <div class="alert alert-info" role="alert">
+                    <i class="bi bi-info-circle"></i> <strong>Coming Soon:</strong> The Communications Service is currently under development. This section will be functional once the service endpoints are implemented.
+                </div>
+
+                <div class="mb-3">
+                    <button class="btn btn-primary" onclick="loadCelebrations()">Load Celebrations</button>
+                    <button class="btn btn-success" onclick="showCreateCelebration()">Create Celebration</button>
+                </div>
+
+                <div id="create-celebration-form" style="display:none;" class="mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Create New Celebration</h5>
+                        </div>
+                        <div class="card-body">
+                            <form onsubmit="createCelebration(event)">
+                                <div class="mb-3">
+                                    <label for="celebration-title" class="form-label">Title</label>
+                                    <input type="text" class="form-control" id="celebration-title" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="celebration-message" class="form-label">Message (HTML)</label>
+                                    <textarea class="form-control" id="celebration-message" rows="4" required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="celebration-type" class="form-label">Type</label>
+                                    <select class="form-select" id="celebration-type">
+                                        <option value="achievement">Achievement</option>
+                                        <option value="milestone">Milestone</option>
+                                        <option value="anniversary">Anniversary</option>
+                                        <option value="promotion">Promotion</option>
+                                        <option value="recognition">Recognition</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="celebration-celebrated-date" class="form-label">Celebrated Date</label>
+                                    <input type="date" class="form-control" id="celebration-celebrated-date">
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Create Celebration</button>
+                                <button type="button" class="btn btn-secondary" onclick="hideCreateCelebration()">Cancel</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Celebrations List</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="celebrations-list">
+                            <p class="text-muted">Click "Load Celebrations" to view organization celebrations</p>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="container-fluid mt-5 mb-4">
+        <hr>
+        <p class="text-center text-muted">&copy; 2025 Rundeskio | API Test Interface | <a href="https://github.com/rundeskio">GitHub</a></p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="api-client.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
