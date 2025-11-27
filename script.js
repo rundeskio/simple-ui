@@ -1,10 +1,13 @@
-// UI Controller for Rundeskio Test Interface
+// UI Controller for Rundeskio Test Interface - Monday.com Style
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=================================');
-    console.log('RUNDESKIO TEST INTERFACE v3.0');
-    console.log('Bootstrap UI - API Integration');
+    console.log('RUNDESKIO TEST INTERFACE v4.0');
+    console.log('Monday.com-inspired UI');
     console.log('=================================');
+
+    // Setup tab navigation
+    setupTabs();
 
     // Load saved configuration
     loadSavedConfig();
@@ -15,6 +18,47 @@ document.addEventListener('DOMContentLoaded', function() {
     // Test API connections on page load
     testConnections();
 });
+
+// ==================== TAB NAVIGATION ====================
+
+function setupTabs() {
+    const navItems = document.querySelectorAll('.monday-nav-item');
+
+    navItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            switchTab(tabName);
+        });
+    });
+}
+
+function switchTab(tabName) {
+    // Hide all tabs
+    const allTabs = document.querySelectorAll('.tab-pane');
+    allTabs.forEach(tab => {
+        tab.style.display = 'none';
+        tab.classList.remove('active');
+    });
+
+    // Remove active from all nav items
+    const allNavItems = document.querySelectorAll('.monday-nav-item');
+    allNavItems.forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Show selected tab
+    const selectedTab = document.getElementById(`${tabName}-tab`);
+    if (selectedTab) {
+        selectedTab.style.display = 'block';
+        selectedTab.classList.add('active');
+    }
+
+    // Activate selected nav item
+    const selectedNavItem = document.querySelector(`.monday-nav-item[data-tab="${tabName}"]`);
+    if (selectedNavItem) {
+        selectedNavItem.classList.add('active');
+    }
+}
 
 // ==================== CONFIGURATION ====================
 
@@ -65,14 +109,21 @@ async function testConnections() {
 }
 
 function updateApiStatus(service, status, data) {
-    const elementId = service === 'work' ? 'work-api-status' : 'comms-api-status';
-    const element = document.getElementById(elementId);
+    const statusElementId = service === 'work' ? 'work-api-status' : 'comms-api-status';
+    const dotElementId = service === 'work' ? 'work-status-dot' : 'comms-status-dot';
+
+    const statusElement = document.getElementById(statusElementId);
+    const dotElement = document.getElementById(dotElementId);
 
     if (status === 'online') {
-        element.innerHTML = `${service.toUpperCase()} API: <span class="text-success fw-bold">Online</span>`;
+        statusElement.textContent = `${service.charAt(0).toUpperCase() + service.slice(1)} API: Online`;
+        dotElement.classList.add('online');
+        dotElement.classList.remove('offline');
         console.log(`${service} API is online:`, data);
     } else {
-        element.innerHTML = `${service.toUpperCase()} API: <span class="text-danger fw-bold">Offline</span>`;
+        statusElement.textContent = `${service.charAt(0).toUpperCase() + service.slice(1)} API: Offline`;
+        dotElement.classList.add('offline');
+        dotElement.classList.remove('online');
         console.error(`${service} API is offline:`, data);
     }
 }
@@ -109,37 +160,49 @@ async function createWorkspace(e) {
 
 async function loadWorkspaces() {
     const container = document.getElementById('workspaces-list');
-    container.innerHTML = '<p>Loading...</p>';
+    container.innerHTML = '<div class="monday-loading"><i class="bi bi-arrow-repeat"></i> Loading...</div>';
 
     try {
         const workspaces = await api.listWorkspaces();
 
         if (!workspaces || workspaces.length === 0) {
-            container.innerHTML = '<p>No workspaces found.</p>';
+            container.innerHTML = `
+                <div class="monday-empty-state">
+                    <i class="bi bi-folder"></i>
+                    <div class="monday-empty-state-title">No workspaces yet</div>
+                    <div class="monday-empty-state-text">Create your first workspace to get started</div>
+                </div>
+            `;
             return;
         }
 
-        let html = '<div class="table-responsive"><table class="table table-striped table-hover"><thead class="table-dark"><tr><th>Name</th><th>Type</th><th>Description</th><th>ID</th><th>Actions</th></tr></thead><tbody>';
+        let html = '<table class="monday-table"><thead><tr><th>Name</th><th>Type</th><th>Description</th><th>ID</th><th>Actions</th></tr></thead><tbody>';
 
         workspaces.forEach(ws => {
             html += `
                 <tr>
                     <td><strong>${escapeHtml(ws.name)}</strong></td>
-                    <td><span class="badge bg-secondary">${escapeHtml(ws.type)}</span></td>
+                    <td><span class="monday-status monday-status-info">${escapeHtml(ws.type)}</span></td>
                     <td>${escapeHtml(ws.description || '-')}</td>
-                    <td><code class="small">${ws.id}</code></td>
+                    <td><span class="monday-code">${ws.id}</span></td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('${ws.id}')">Copy ID</button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteWorkspace('${ws.id}', '${escapeHtml(ws.name)}')">Delete</button>
+                        <div class="monday-table-actions">
+                            <button class="monday-btn monday-btn-sm monday-btn-icon" onclick="copyToClipboard('${ws.id}')">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                            <button class="monday-btn monday-btn-sm monday-btn-danger" onclick="deleteWorkspace('${ws.id}', '${escapeHtml(ws.name)}')">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `;
         });
 
-        html += '</tbody></table></div></div>';
+        html += '</tbody></table>';
         container.innerHTML = html;
     } catch (error) {
-        container.innerHTML = `<p class="error">Error loading workspaces: ${error.message}</p>`;
+        container.innerHTML = `<div class="monday-alert monday-alert-danger"><i class="bi bi-exclamation-triangle"></i><div>Error loading workspaces: ${error.message}</div></div>`;
     }
 }
 
@@ -191,37 +254,50 @@ async function loadTasks() {
     const container = document.getElementById('tasks-list');
     const workspaceId = document.getElementById('task-workspace-id').value || null;
 
-    container.innerHTML = '<p>Loading...</p>';
+    container.innerHTML = '<div class="monday-loading"><i class="bi bi-arrow-repeat"></i> Loading...</div>';
 
     try {
         const tasks = await api.listTasks(workspaceId);
 
         if (!tasks || tasks.length === 0) {
-            container.innerHTML = '<p>No tasks found.</p>';
+            container.innerHTML = `
+                <div class="monday-empty-state">
+                    <i class="bi bi-check-square"></i>
+                    <div class="monday-empty-state-title">No tasks found</div>
+                    <div class="monday-empty-state-text">Create a task to get started</div>
+                </div>
+            `;
             return;
         }
 
-        let html = '<div class="table-responsive"><table class="table table-striped table-hover"><thead class="table-dark"><tr><th>Title</th><th>Status</th><th>Due Date</th><th>ID</th><th>Actions</th></tr></thead><tbody>';
+        let html = '<table class="monday-table"><thead><tr><th>Title</th><th>Status</th><th>Due Date</th><th>ID</th><th>Actions</th></tr></thead><tbody>';
 
         tasks.forEach(task => {
-            const statusBadge = task.status === 'completed' ? 'bg-success' : task.status === 'in_progress' ? 'bg-warning' : 'bg-secondary';
+            const statusClass = task.status === 'completed' ? 'monday-status-success' :
+                              task.status === 'in_progress' ? 'monday-status-warning' :
+                              'monday-status-secondary';
             html += `
                 <tr>
-                    <td><strong>${escapeHtml(task.title)}</strong><br><small class="text-muted">${escapeHtml(task.description || '')}</small></td>
-                    <td><span class="badge ${statusBadge}">${escapeHtml(task.status)}</span></td>
-                    <td>${task.due_date || '-'}</td>
-                    <td><code class="small">${task.id}</code></td>
                     <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteTask('${task.workspace_id}', '${task.id}')">Delete</button>
+                        <strong>${escapeHtml(task.title)}</strong>
+                        ${task.description ? `<br><small style="color: var(--text-secondary);">${escapeHtml(task.description)}</small>` : ''}
+                    </td>
+                    <td><span class="monday-status ${statusClass}">${escapeHtml(task.status.replace('_', ' '))}</span></td>
+                    <td>${task.due_date || '-'}</td>
+                    <td><span class="monday-code">${task.id}</span></td>
+                    <td>
+                        <button class="monday-btn monday-btn-sm monday-btn-danger" onclick="deleteTask('${task.workspace_id}', '${task.id}')">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
                     </td>
                 </tr>
             `;
         });
 
-        html += '</tbody></table></div></div>';
+        html += '</tbody></table>';
         container.innerHTML = html;
     } catch (error) {
-        container.innerHTML = `<p class="error">Error loading tasks: ${error.message}</p>`;
+        container.innerHTML = `<div class="monday-alert monday-alert-danger"><i class="bi bi-exclamation-triangle"></i><div>Error loading tasks: ${error.message}</div></div>`;
     }
 }
 
@@ -274,40 +350,55 @@ async function loadGoals() {
     const workspaceId = document.getElementById('goal-workspace-id').value;
 
     if (!workspaceId) {
-        container.innerHTML = '<p>Please enter a workspace ID</p>';
+        container.innerHTML = '<div class="monday-alert monday-alert-warning"><i class="bi bi-exclamation-circle"></i><div>Please enter a workspace ID</div></div>';
         return;
     }
 
-    container.innerHTML = '<p>Loading...</p>';
+    container.innerHTML = '<div class="monday-loading"><i class="bi bi-arrow-repeat"></i> Loading...</div>';
 
     try {
         const goals = await api.listGoals(workspaceId);
 
         if (!goals || goals.length === 0) {
-            container.innerHTML = '<p>No goals found.</p>';
+            container.innerHTML = `
+                <div class="monday-empty-state">
+                    <i class="bi bi-bullseye"></i>
+                    <div class="monday-empty-state-title">No goals found</div>
+                    <div class="monday-empty-state-text">Set your first goal to track progress</div>
+                </div>
+            `;
             return;
         }
 
-        let html = '<div class="table-responsive"><table class="table table-striped table-hover"><thead class="table-dark"><tr><th>Title</th><th>Status</th><th>Target Date</th><th>Progress</th><th>Actions</th></tr></thead><tbody>';
+        let html = '<table class="monday-table"><thead><tr><th>Title</th><th>Status</th><th>Target Date</th><th>Progress</th><th>Actions</th></tr></thead><tbody>';
 
         goals.forEach(goal => {
+            const statusClass = goal.status === 'completed' ? 'monday-status-success' :
+                              goal.status === 'in_progress' ? 'monday-status-warning' :
+                              goal.status === 'on_hold' ? 'monday-status-danger' :
+                              'monday-status-secondary';
             html += `
                 <tr>
-                    <td><strong>${escapeHtml(goal.title)}</strong><br><small>${escapeHtml(goal.description || '')}</small></td>
-                    <td>${escapeHtml(goal.status)}</td>
-                    <td>${goal.target_date || '-'}</td>
-                    <td>${goal.progress_percentage || 0}%</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteGoal('${workspaceId}', '${goal.id}')">Delete</button>
+                        <strong>${escapeHtml(goal.title)}</strong>
+                        ${goal.description ? `<br><small style="color: var(--text-secondary);">${escapeHtml(goal.description)}</small>` : ''}
+                    </td>
+                    <td><span class="monday-status ${statusClass}">${escapeHtml(goal.status.replace('_', ' '))}</span></td>
+                    <td>${goal.target_date || '-'}</td>
+                    <td><span class="monday-status monday-status-info">${goal.progress_percentage || 0}%</span></td>
+                    <td>
+                        <button class="monday-btn monday-btn-sm monday-btn-danger" onclick="deleteGoal('${workspaceId}', '${goal.id}')">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
                     </td>
                 </tr>
             `;
         });
 
-        html += '</tbody></table></div>';
+        html += '</tbody></table>';
         container.innerHTML = html;
     } catch (error) {
-        container.innerHTML = `<p class="error">Error loading goals: ${error.message}</p>`;
+        container.innerHTML = `<div class="monday-alert monday-alert-danger"><i class="bi bi-exclamation-triangle"></i><div>Error loading goals: ${error.message}</div></div>`;
     }
 }
 
