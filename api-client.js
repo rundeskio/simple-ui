@@ -12,8 +12,8 @@ class RundeskioAPI {
     loadConfig() {
         this.workApiUrl = localStorage.getItem('work-api-url') || 'http://localhost:8001';
         this.commsApiUrl = localStorage.getItem('comms-api-url') || 'http://localhost:8002';
-        this.orgId = localStorage.getItem('org-id') || '1';
-        this.userId = localStorage.getItem('user-id') || '1';
+        this.orgId = localStorage.getItem('org-id') || '208ac6e1-a770-4f92-b9e7-1f1f46c4adaf';
+        this.userId = localStorage.getItem('user-id') || '208ac6e1-a770-4f92-b9e7-1f1f46c4adaf';
     }
 
     saveConfig(workUrl, commsUrl, orgId, userId) {
@@ -226,35 +226,38 @@ class RundeskioAPI {
     // ==================== COMMS SERVICE ====================
 
     // Announcements
-    async listAnnouncements(workspaceId, filters = {}) {
+    async listAnnouncements(filters = {}) {
         const params = new URLSearchParams();
-        params.append('skip', filters.skip || 0);
-        params.append('limit', filters.limit || 50);
+        params.append('page', filters.page || 1);
+        params.append('page_size', filters.page_size || 20);
         if (filters.priority) params.append('priority', filters.priority);
+        if (filters.workspace_id) params.append('workspace_id', filters.workspace_id);
+        if (filters.visibility) params.append('visibility', filters.visibility);
+        if (filters.status) params.append('status', filters.status);
 
-        return this.request('comms', `/workspaces/${workspaceId}/announcements?${params.toString()}`);
+        return this.request('comms', `/api/v1/announcements?${params.toString()}`);
     }
 
-    async createAnnouncement(workspaceId, data) {
-        return this.request('comms', `/workspaces/${workspaceId}/announcements`, {
+    async createAnnouncement(data) {
+        return this.request('comms', '/api/v1/announcements', {
             method: 'POST',
             body: JSON.stringify(data)
         });
     }
 
     async getAnnouncement(announcementId) {
-        return this.request('comms', `/announcements/${announcementId}`);
+        return this.request('comms', `/api/v1/announcements/${announcementId}`);
     }
 
     async updateAnnouncement(announcementId, data) {
-        return this.request('comms', `/announcements/${announcementId}`, {
+        return this.request('comms', `/api/v1/announcements/${announcementId}`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         });
     }
 
     async deleteAnnouncement(announcementId) {
-        return this.request('comms', `/announcements/${announcementId}`, {
+        return this.request('comms', `/api/v1/announcements/${announcementId}`, {
             method: 'DELETE'
         });
     }
@@ -262,34 +265,35 @@ class RundeskioAPI {
     // Memos
     async listMemos(filters = {}) {
         const params = new URLSearchParams();
-        params.append('skip', filters.skip || 0);
-        params.append('limit', filters.limit || 50);
+        params.append('page', filters.page || 1);
+        params.append('page_size', filters.page_size || 20);
         if (filters.type) params.append('type', filters.type);
         if (filters.visibility) params.append('visibility', filters.visibility);
+        if (filters.status) params.append('status', filters.status);
 
-        return this.request('comms', `/orgs/${this.orgId}/memos?${params.toString()}`);
+        return this.request('comms', `/api/v1/memos?${params.toString()}`);
     }
 
     async createMemo(data) {
-        return this.request('comms', `/orgs/${this.orgId}/memos`, {
+        return this.request('comms', '/api/v1/memos', {
             method: 'POST',
             body: JSON.stringify(data)
         });
     }
 
     async getMemo(memoId) {
-        return this.request('comms', `/memos/${memoId}`);
+        return this.request('comms', `/api/v1/memos/${memoId}`);
     }
 
     async updateMemo(memoId, data) {
-        return this.request('comms', `/memos/${memoId}`, {
+        return this.request('comms', `/api/v1/memos/${memoId}`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         });
     }
 
     async deleteMemo(memoId) {
-        return this.request('comms', `/memos/${memoId}`, {
+        return this.request('comms', `/api/v1/memos/${memoId}`, {
             method: 'DELETE'
         });
     }
@@ -297,33 +301,34 @@ class RundeskioAPI {
     // Decision Records
     async listDecisions(filters = {}) {
         const params = new URLSearchParams();
-        params.append('skip', filters.skip || 0);
-        params.append('limit', filters.limit || 50);
+        params.append('page', filters.page || 1);
+        params.append('page_size', filters.page_size || 20);
         if (filters.status) params.append('status', filters.status);
+        if (filters.visibility) params.append('visibility', filters.visibility);
 
-        return this.request('comms', `/orgs/${this.orgId}/decisions?${params.toString()}`);
+        return this.request('comms', `/api/v1/decisions?${params.toString()}`);
     }
 
     async createDecision(data) {
-        return this.request('comms', `/orgs/${this.orgId}/decisions`, {
+        return this.request('comms', '/api/v1/decisions', {
             method: 'POST',
             body: JSON.stringify(data)
         });
     }
 
     async getDecision(decisionId) {
-        return this.request('comms', `/decisions/${decisionId}`);
+        return this.request('comms', `/api/v1/decisions/${decisionId}`);
     }
 
     async updateDecision(decisionId, data) {
-        return this.request('comms', `/decisions/${decisionId}`, {
+        return this.request('comms', `/api/v1/decisions/${decisionId}`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         });
     }
 
     async deleteDecision(decisionId) {
-        return this.request('comms', `/decisions/${decisionId}`, {
+        return this.request('comms', `/api/v1/decisions/${decisionId}`, {
             method: 'DELETE'
         });
     }
@@ -331,33 +336,35 @@ class RundeskioAPI {
     // Celebrations
     async listCelebrations(filters = {}) {
         const params = new URLSearchParams();
-        params.append('skip', filters.skip || 0);
-        params.append('limit', filters.limit || 50);
+        params.append('page', filters.page || 1);
+        params.append('page_size', filters.page_size || 20);
         if (filters.type) params.append('type', filters.type);
+        if (filters.visibility) params.append('visibility', filters.visibility);
+        if (filters.status) params.append('status', filters.status);
 
-        return this.request('comms', `/orgs/${this.orgId}/celebrations?${params.toString()}`);
+        return this.request('comms', `/api/v1/celebrations?${params.toString()}`);
     }
 
     async createCelebration(data) {
-        return this.request('comms', `/orgs/${this.orgId}/celebrations`, {
+        return this.request('comms', '/api/v1/celebrations', {
             method: 'POST',
             body: JSON.stringify(data)
         });
     }
 
     async getCelebration(celebrationId) {
-        return this.request('comms', `/celebrations/${celebrationId}`);
+        return this.request('comms', `/api/v1/celebrations/${celebrationId}`);
     }
 
     async updateCelebration(celebrationId, data) {
-        return this.request('comms', `/celebrations/${celebrationId}`, {
+        return this.request('comms', `/api/v1/celebrations/${celebrationId}`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         });
     }
 
     async deleteCelebration(celebrationId) {
-        return this.request('comms', `/celebrations/${celebrationId}`, {
+        return this.request('comms', `/api/v1/celebrations/${celebrationId}`, {
             method: 'DELETE'
         });
     }
@@ -365,33 +372,34 @@ class RundeskioAPI {
     // Newsletters
     async listNewsletters(filters = {}) {
         const params = new URLSearchParams();
-        params.append('skip', filters.skip || 0);
-        params.append('limit', filters.limit || 50);
+        params.append('page', filters.page || 1);
+        params.append('page_size', filters.page_size || 20);
         if (filters.status) params.append('status', filters.status);
+        if (filters.visibility) params.append('visibility', filters.visibility);
 
-        return this.request('comms', `/orgs/${this.orgId}/newsletters?${params.toString()}`);
+        return this.request('comms', `/api/v1/newsletters?${params.toString()}`);
     }
 
     async createNewsletter(data) {
-        return this.request('comms', `/orgs/${this.orgId}/newsletters`, {
+        return this.request('comms', '/api/v1/newsletters', {
             method: 'POST',
             body: JSON.stringify(data)
         });
     }
 
     async getNewsletter(newsletterId) {
-        return this.request('comms', `/newsletters/${newsletterId}`);
+        return this.request('comms', `/api/v1/newsletters/${newsletterId}`);
     }
 
     async updateNewsletter(newsletterId, data) {
-        return this.request('comms', `/newsletters/${newsletterId}`, {
+        return this.request('comms', `/api/v1/newsletters/${newsletterId}`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         });
     }
 
     async deleteNewsletter(newsletterId) {
-        return this.request('comms', `/newsletters/${newsletterId}`, {
+        return this.request('comms', `/api/v1/newsletters/${newsletterId}`, {
             method: 'DELETE'
         });
     }
@@ -399,33 +407,35 @@ class RundeskioAPI {
     // Shares
     async listShares(filters = {}) {
         const params = new URLSearchParams();
-        params.append('skip', filters.skip || 0);
-        params.append('limit', filters.limit || 50);
+        params.append('page', filters.page || 1);
+        params.append('page_size', filters.page_size || 20);
         if (filters.category) params.append('category', filters.category);
+        if (filters.visibility) params.append('visibility', filters.visibility);
+        if (filters.status) params.append('status', filters.status);
 
-        return this.request('comms', `/orgs/${this.orgId}/shares?${params.toString()}`);
+        return this.request('comms', `/api/v1/shares?${params.toString()}`);
     }
 
     async createShare(data) {
-        return this.request('comms', `/orgs/${this.orgId}/shares`, {
+        return this.request('comms', '/api/v1/shares', {
             method: 'POST',
             body: JSON.stringify(data)
         });
     }
 
     async getShare(shareId) {
-        return this.request('comms', `/shares/${shareId}`);
+        return this.request('comms', `/api/v1/shares/${shareId}`);
     }
 
     async updateShare(shareId, data) {
-        return this.request('comms', `/shares/${shareId}`, {
+        return this.request('comms', `/api/v1/shares/${shareId}`, {
             method: 'PATCH',
             body: JSON.stringify(data)
         });
     }
 
     async deleteShare(shareId) {
-        return this.request('comms', `/shares/${shareId}`, {
+        return this.request('comms', `/api/v1/shares/${shareId}`, {
             method: 'DELETE'
         });
     }

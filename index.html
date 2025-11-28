@@ -62,22 +62,18 @@
                     <button class="monday-nav-item" data-tab="announcements">
                         <i class="bi bi-megaphone"></i>
                         Announcements
-                        <span class="monday-badge">Soon</span>
                     </button>
                     <button class="monday-nav-item" data-tab="memos">
                         <i class="bi bi-file-text"></i>
                         Memos
-                        <span class="monday-badge">Soon</span>
                     </button>
                     <button class="monday-nav-item" data-tab="decisions">
                         <i class="bi bi-diagram-3"></i>
                         Decisions
-                        <span class="monday-badge">Soon</span>
                     </button>
                     <button class="monday-nav-item" data-tab="celebrations">
                         <i class="bi bi-trophy"></i>
                         Celebrations
-                        <span class="monday-badge">Soon</span>
                     </button>
                 </div>
             </nav>
@@ -111,12 +107,12 @@
 
                                 <div class="monday-form-group">
                                     <label class="monday-label" for="org-id">Organization ID</label>
-                                    <input type="text" class="monday-input" id="org-id" value="1">
+                                    <input type="text" class="monday-input" id="org-id" value="208ac6e1-a770-4f92-b9e7-1f1f46c4adaf">
                                 </div>
 
                                 <div class="monday-form-group">
                                     <label class="monday-label" for="user-id">User ID</label>
-                                    <input type="text" class="monday-input" id="user-id" value="1">
+                                    <input type="text" class="monday-input" id="user-id" value="208ac6e1-a770-4f92-b9e7-1f1f46c4adaf">
                                 </div>
 
                                 <div class="d-flex gap-2">
@@ -308,13 +304,82 @@
                     <div class="monday-page-header">
                         <h2 class="monday-page-title">Announcements</h2>
                         <p class="monday-page-subtitle">Company-wide announcements</p>
+                        <button class="monday-btn monday-btn-primary" onclick="showCreateAnnouncement()">
+                            <i class="bi bi-plus-circle"></i> New Announcement
+                        </button>
                     </div>
 
-                    <div class="monday-alert monday-alert-info">
-                        <i class="bi bi-info-circle"></i>
-                        <div>
-                            <strong>Coming Soon</strong><br>
-                            The Communications Service is currently under development.
+                    <!-- Create Form -->
+                    <div id="create-announcement-form" class="monday-card" style="display:none; margin-bottom: 20px;">
+                        <div class="monday-card-header">
+                            <h3 class="monday-card-title">Create Announcement</h3>
+                        </div>
+                        <div class="monday-card-body">
+                            <form onsubmit="createAnnouncement(event)">
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Title *</label>
+                                    <input type="text" class="monday-input" id="announcement-title" required>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Content *</label>
+                                    <textarea class="monday-input" id="announcement-content" rows="4" required></textarea>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Priority</label>
+                                    <select class="monday-input" id="announcement-priority">
+                                        <option value="normal">Normal</option>
+                                        <option value="high">High</option>
+                                        <option value="urgent">Urgent</option>
+                                    </select>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Visibility</label>
+                                    <select class="monday-input" id="announcement-visibility">
+                                        <option value="workspace">Workspace</option>
+                                        <option value="organization">Organization</option>
+                                        <option value="team">Team</option>
+                                    </select>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Workspace ID (optional)</label>
+                                    <input type="text" class="monday-input" id="announcement-workspace-id-create" placeholder="Leave blank for org-level">
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="monday-btn monday-btn-primary">
+                                        <i class="bi bi-check-circle"></i> Create
+                                    </button>
+                                    <button type="button" class="monday-btn monday-btn-secondary" onclick="hideCreateAnnouncement()">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="monday-card" style="margin-bottom: 20px;">
+                        <div class="monday-card-body">
+                            <div class="d-flex gap-2 align-items-end">
+                                <div class="monday-form-group" style="flex: 1;">
+                                    <label class="monday-label">Filter by Workspace ID</label>
+                                    <input type="text" class="monday-input" id="announcement-workspace-id" placeholder="Optional">
+                                </div>
+                                <button class="monday-btn monday-btn-primary" onclick="loadAnnouncements()">
+                                    <i class="bi bi-search"></i> Load
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- List -->
+                    <div class="monday-card">
+                        <div class="monday-card-header">
+                            <h3 class="monday-card-title">All Announcements</h3>
+                        </div>
+                        <div class="monday-card-body">
+                            <div id="announcements-list">
+                                <p>Click "Load" to fetch announcements</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -324,13 +389,67 @@
                     <div class="monday-page-header">
                         <h2 class="monday-page-title">Memos</h2>
                         <p class="monday-page-subtitle">Internal memos and policies</p>
+                        <button class="monday-btn monday-btn-primary" onclick="showCreateMemo()">
+                            <i class="bi bi-plus-circle"></i> New Memo
+                        </button>
                     </div>
 
-                    <div class="monday-alert monday-alert-info">
-                        <i class="bi bi-info-circle"></i>
-                        <div>
-                            <strong>Coming Soon</strong><br>
-                            The Communications Service is currently under development.
+                    <!-- Create Form -->
+                    <div id="create-memo-form" class="monday-card" style="display:none; margin-bottom: 20px;">
+                        <div class="monday-card-header">
+                            <h3 class="monday-card-title">Create Memo</h3>
+                        </div>
+                        <div class="monday-card-body">
+                            <form onsubmit="createMemo(event)">
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Title *</label>
+                                    <input type="text" class="monday-input" id="memo-title" required>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Content *</label>
+                                    <textarea class="monday-input" id="memo-content" rows="4" required></textarea>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Type</label>
+                                    <select class="monday-input" id="memo-type">
+                                        <option value="general">General</option>
+                                        <option value="policy">Policy</option>
+                                        <option value="procedure">Procedure</option>
+                                        <option value="guideline">Guideline</option>
+                                    </select>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Visibility</label>
+                                    <select class="monday-input" id="memo-visibility">
+                                        <option value="workspace">Workspace</option>
+                                        <option value="organization">Organization</option>
+                                        <option value="team">Team</option>
+                                    </select>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="monday-btn monday-btn-primary">
+                                        <i class="bi bi-check-circle"></i> Create
+                                    </button>
+                                    <button type="button" class="monday-btn monday-btn-secondary" onclick="hideCreateMemo()">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- List -->
+                    <div class="monday-card">
+                        <div class="monday-card-header">
+                            <h3 class="monday-card-title">All Memos</h3>
+                            <button class="monday-btn monday-btn-primary monday-btn-sm" onclick="loadMemos()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="monday-card-body">
+                            <div id="memos-list">
+                                <p>Click "Refresh" to fetch memos</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -340,13 +459,80 @@
                     <div class="monday-page-header">
                         <h2 class="monday-page-title">Decision Records</h2>
                         <p class="monday-page-subtitle">Track important decisions</p>
+                        <button class="monday-btn monday-btn-primary" onclick="showCreateDecision()">
+                            <i class="bi bi-plus-circle"></i> New Decision
+                        </button>
                     </div>
 
-                    <div class="monday-alert monday-alert-info">
-                        <i class="bi bi-info-circle"></i>
-                        <div>
-                            <strong>Coming Soon</strong><br>
-                            The Communications Service is currently under development.
+                    <!-- Create Form -->
+                    <div id="create-decision-form" class="monday-card" style="display:none; margin-bottom: 20px;">
+                        <div class="monday-card-header">
+                            <h3 class="monday-card-title">Create Decision Record</h3>
+                        </div>
+                        <div class="monday-card-body">
+                            <form onsubmit="createDecision(event)">
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Title *</label>
+                                    <input type="text" class="monday-input" id="decision-title" required>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Context *</label>
+                                    <textarea class="monday-input" id="decision-context" rows="3" required placeholder="Background and context"></textarea>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Decision *</label>
+                                    <textarea class="monday-input" id="decision-decision" rows="3" required placeholder="The decision itself"></textarea>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Consequences (optional)</label>
+                                    <textarea class="monday-input" id="decision-consequences" rows="2" placeholder="Expected outcomes"></textarea>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Alternatives (optional)</label>
+                                    <textarea class="monday-input" id="decision-alternatives" rows="2" placeholder="Other options considered"></textarea>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Status</label>
+                                    <select class="monday-input" id="decision-status">
+                                        <option value="proposed">Proposed</option>
+                                        <option value="accepted">Accepted</option>
+                                        <option value="rejected">Rejected</option>
+                                        <option value="deprecated">Deprecated</option>
+                                        <option value="superseded">Superseded</option>
+                                    </select>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Visibility</label>
+                                    <select class="monday-input" id="decision-visibility">
+                                        <option value="workspace">Workspace</option>
+                                        <option value="organization">Organization</option>
+                                        <option value="team">Team</option>
+                                    </select>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="monday-btn monday-btn-primary">
+                                        <i class="bi bi-check-circle"></i> Create
+                                    </button>
+                                    <button type="button" class="monday-btn monday-btn-secondary" onclick="hideCreateDecision()">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- List -->
+                    <div class="monday-card">
+                        <div class="monday-card-header">
+                            <h3 class="monday-card-title">All Decisions</h3>
+                            <button class="monday-btn monday-btn-primary monday-btn-sm" onclick="loadDecisions()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="monday-card-body">
+                            <div id="decisions-list">
+                                <p>Click "Refresh" to fetch decisions</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -356,13 +542,69 @@
                     <div class="monday-page-header">
                         <h2 class="monday-page-title">Celebrations</h2>
                         <p class="monday-page-subtitle">Recognize team achievements</p>
+                        <button class="monday-btn monday-btn-primary" onclick="showCreateCelebration()">
+                            <i class="bi bi-plus-circle"></i> New Celebration
+                        </button>
                     </div>
 
-                    <div class="monday-alert monday-alert-info">
-                        <i class="bi bi-info-circle"></i>
-                        <div>
-                            <strong>Coming Soon</strong><br>
-                            The Communications Service is currently under development.
+                    <!-- Create Form -->
+                    <div id="create-celebration-form" class="monday-card" style="display:none; margin-bottom: 20px;">
+                        <div class="monday-card-header">
+                            <h3 class="monday-card-title">Create Celebration</h3>
+                        </div>
+                        <div class="monday-card-body">
+                            <form onsubmit="createCelebration(event)">
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Title *</label>
+                                    <input type="text" class="monday-input" id="celebration-title" required>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Message *</label>
+                                    <textarea class="monday-input" id="celebration-content" rows="4" required></textarea>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Type</label>
+                                    <select class="monday-input" id="celebration-type">
+                                        <option value="achievement">Achievement</option>
+                                        <option value="milestone">Milestone</option>
+                                        <option value="birthday">Birthday</option>
+                                        <option value="anniversary">Work Anniversary</option>
+                                        <option value="recognition">Recognition</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="monday-form-group">
+                                    <label class="monday-label">Visibility</label>
+                                    <select class="monday-input" id="celebration-visibility">
+                                        <option value="workspace">Workspace</option>
+                                        <option value="organization">Organization</option>
+                                        <option value="team">Team</option>
+                                    </select>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="monday-btn monday-btn-primary">
+                                        <i class="bi bi-check-circle"></i> Create
+                                    </button>
+                                    <button type="button" class="monday-btn monday-btn-secondary" onclick="hideCreateCelebration()">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- List -->
+                    <div class="monday-card">
+                        <div class="monday-card-header">
+                            <h3 class="monday-card-title">All Celebrations</h3>
+                            <button class="monday-btn monday-btn-primary monday-btn-sm" onclick="loadCelebrations()">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="monday-card-body">
+                            <div id="celebrations-list">
+                                <p>Click "Refresh" to fetch celebrations</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -370,7 +612,7 @@
         </main>
     </div>
 
-    <script src="api-client.js"></script>
-    <script src="script.js"></script>
+    <script src="api-client.js?v=2"></script>
+    <script src="script.js?v=2"></script>
 </body>
 </html>

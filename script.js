@@ -427,21 +427,56 @@ function hideCreateAnnouncement() {
 async function createAnnouncement(e) {
     e.preventDefault();
 
-    const workspaceId = document.getElementById('announcement-workspace-id-create').value;
-    const data = {
-        title: document.getElementById('announcement-title').value,
-        content_html: document.getElementById('announcement-content').value,
-        priority: document.getElementById('announcement-priority').value,
-        expires_at: document.getElementById('announcement-expires').value || null
-    };
-
     try {
-        const announcement = await api.createAnnouncement(workspaceId, data);
+        // Get all form elements with null checks
+        const titleEl = document.getElementById('announcement-title');
+        const contentEl = document.getElementById('announcement-content');
+        const priorityEl = document.getElementById('announcement-priority');
+        const visibilityEl = document.getElementById('announcement-visibility');
+        const workspaceIdEl = document.getElementById('announcement-workspace-id-create');
+
+        if (!titleEl || !contentEl || !priorityEl || !visibilityEl || !workspaceIdEl) {
+            console.error('Missing form elements:', {
+                title: !!titleEl,
+                content: !!contentEl,
+                priority: !!priorityEl,
+                visibility: !!visibilityEl,
+                workspaceId: !!workspaceIdEl
+            });
+            alert('Form elements not found. Please refresh the page.');
+            return;
+        }
+
+        const workspaceId = workspaceIdEl.value;
+        const contentText = contentEl.value;
+
+        // Convert text to ProseMirror JSON format
+        const content = {
+            type: 'doc',
+            content: [{
+                type: 'paragraph',
+                content: [{
+                    type: 'text',
+                    text: contentText
+                }]
+            }]
+        };
+
+        const data = {
+            title: titleEl.value,
+            content: content,
+            priority: priorityEl.value,
+            visibility: visibilityEl.value,
+            workspace_id: workspaceId || null
+        };
+
+        const announcement = await api.createAnnouncement(data);
         alert(`Announcement created: ${announcement.title}`);
         hideCreateAnnouncement();
         e.target.reset();
         loadAnnouncements();
     } catch (error) {
+        console.error('Error creating announcement:', error);
         alert(`Error creating announcement: ${error.message}`);
     }
 }
@@ -450,38 +485,39 @@ async function loadAnnouncements() {
     const container = document.getElementById('announcements-list');
     const workspaceId = document.getElementById('announcement-workspace-id').value;
 
-    if (!workspaceId) {
-        container.innerHTML = '<p>Please enter a workspace ID</p>';
-        return;
-    }
-
     container.innerHTML = '<p>Loading...</p>';
 
     try {
-        const announcements = await api.listAnnouncements(workspaceId);
+        const filters = workspaceId ? { workspace_id: workspaceId } : {};
+        const announcements = await api.listAnnouncements(filters);
 
         if (!announcements || announcements.length === 0) {
-            container.innerHTML = '<p>No announcements found.</p>';
+            container.innerHTML = '<div class="monday-empty-state"><p>No announcements found.</p></div>';
             return;
         }
 
-        let html = '<div class="table-responsive"><table class="table table-striped table-hover"><thead class="table-dark"><tr><th>Title</th><th>Priority</th><th>Content</th><th>Created</th><th>Actions</th></tr></thead><tbody>';
+        let html = '<table class="monday-table"><thead><tr><th>Title</th><th>Priority</th><th>Status</th><th>Visibility</th><th>Published</th><th>Actions</th></tr></thead><tbody>';
 
         announcements.forEach(item => {
+            const priorityClass = item.priority === 'urgent' ? 'danger' : item.priority === 'high' ? 'warning' : 'info';
+            const statusClass = item.status === 'published' ? 'success' : item.status === 'draft' ? 'warning' : 'info';
             html += `
                 <tr>
                     <td><strong>${escapeHtml(item.title)}</strong></td>
-                    <td>${escapeHtml(item.priority)}</td>
-                    <td>${truncate(stripHtml(item.content_html), 100)}</td>
-                    <td>${formatDate(item.created_at)}</td>
+                    <td><span class="monday-status monday-status-${priorityClass}">${escapeHtml(item.priority)}</span></td>
+                    <td><span class="monday-status monday-status-${statusClass}">${escapeHtml(item.status)}</span></td>
+                    <td>${escapeHtml(item.visibility)}</td>
+                    <td>${item.published_at ? formatDate(item.published_at) : 'Not published'}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteAnnouncement('${item.id}')">Delete</button>
+                        <button class="monday-btn monday-btn-sm monday-btn-danger" onclick="deleteAnnouncement('${item.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             `;
         });
 
-        html += '</tbody></table></div>';
+        html += '</tbody></table>';
         container.innerHTML = html;
     } catch (error) {
         container.innerHTML = `<p class="error">Error loading announcements: ${error.message}</p>`;
@@ -513,12 +549,25 @@ function hideCreateMemo() {
 async function createMemo(e) {
     e.preventDefault();
 
+    const contentText = document.getElementById('memo-content').value;
+
+    // Convert text to ProseMirror JSON format
+    const content = {
+        type: 'doc',
+        content: [{
+            type: 'paragraph',
+            content: [{
+                type: 'text',
+                text: contentText
+            }]
+        }]
+    };
+
     const data = {
         title: document.getElementById('memo-title').value,
-        content_html: document.getElementById('memo-content').value,
-        type: document.getElementById('memo-type').value,
-        visibility: document.getElementById('memo-visibility').value,
-        effective_date: document.getElementById('memo-effective-date').value || null
+        content: content,
+        memo_type: document.getElementById('memo-type').value,
+        visibility: document.getElementById('memo-visibility').value
     };
 
     try {
@@ -540,27 +589,31 @@ async function loadMemos() {
         const memos = await api.listMemos();
 
         if (!memos || memos.length === 0) {
-            container.innerHTML = '<p>No memos found.</p>';
+            container.innerHTML = '<div class="monday-empty-state"><p>No memos found.</p></div>';
             return;
         }
 
-        let html = '<div class="table-responsive"><table class="table table-striped table-hover"><thead class="table-dark"><tr><th>Title</th><th>Type</th><th>Visibility</th><th>Effective Date</th><th>Actions</th></tr></thead><tbody>';
+        let html = '<table class="monday-table"><thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Visibility</th><th>Published</th><th>Actions</th></tr></thead><tbody>';
 
         memos.forEach(memo => {
+            const statusClass = memo.status === 'published' ? 'success' : memo.status === 'draft' ? 'warning' : 'info';
             html += `
                 <tr>
                     <td><strong>${escapeHtml(memo.title)}</strong></td>
-                    <td>${escapeHtml(memo.type)}</td>
+                    <td><span class="monday-status monday-status-info">${escapeHtml(memo.memo_type)}</span></td>
+                    <td><span class="monday-status monday-status-${statusClass}">${escapeHtml(memo.status)}</span></td>
                     <td>${escapeHtml(memo.visibility)}</td>
-                    <td>${memo.effective_date || '-'}</td>
+                    <td>${memo.published_at ? formatDate(memo.published_at) : 'Not published'}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteMemo('${memo.id}')">Delete</button>
+                        <button class="monday-btn monday-btn-sm monday-btn-danger" onclick="deleteMemo('${memo.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             `;
         });
 
-        html += '</tbody></table></div>';
+        html += '</tbody></table>';
         container.innerHTML = html;
     } catch (error) {
         container.innerHTML = `<p class="error">Error loading memos: ${error.message}</p>`;
@@ -592,14 +645,31 @@ function hideCreateDecision() {
 async function createDecision(e) {
     e.preventDefault();
 
+    // Helper to convert text to ProseMirror JSON
+    const textToProseMirror = (text) => ({
+        type: 'doc',
+        content: [{
+            type: 'paragraph',
+            content: text ? [{
+                type: 'text',
+                text: text
+            }] : []
+        }]
+    });
+
+    const contextText = document.getElementById('decision-context').value;
+    const decisionText = document.getElementById('decision-decision').value;
+    const consequencesText = document.getElementById('decision-consequences').value;
+    const alternativesText = document.getElementById('decision-alternatives').value;
+
     const data = {
         title: document.getElementById('decision-title').value,
-        context_html: document.getElementById('decision-context').value,
-        decision_html: document.getElementById('decision-decision').value,
-        consequences_html: document.getElementById('decision-consequences').value || null,
-        alternatives_html: document.getElementById('decision-alternatives').value || null,
+        context: textToProseMirror(contextText),
+        decision: textToProseMirror(decisionText),
+        consequences: consequencesText ? textToProseMirror(consequencesText) : null,
+        alternatives: alternativesText ? textToProseMirror(alternativesText) : null,
         status: document.getElementById('decision-status').value,
-        decided_date: document.getElementById('decision-decided-date').value || null
+        visibility: document.getElementById('decision-visibility').value
     };
 
     try {
@@ -621,27 +691,32 @@ async function loadDecisions() {
         const decisions = await api.listDecisions();
 
         if (!decisions || decisions.length === 0) {
-            container.innerHTML = '<p>No decisions found.</p>';
+            container.innerHTML = '<div class="monday-empty-state"><p>No decisions found.</p></div>';
             return;
         }
 
-        let html = '<div class="table-responsive"><table class="table table-striped table-hover"><thead class="table-dark"><tr><th>Title</th><th>Status</th><th>Decided Date</th><th>Context</th><th>Actions</th></tr></thead><tbody>';
+        let html = '<table class="monday-table"><thead><tr><th>Title</th><th>Status</th><th>Visibility</th><th>Published</th><th>Actions</th></tr></thead><tbody>';
 
         decisions.forEach(decision => {
+            const statusClass = decision.status === 'accepted' ? 'success' :
+                              decision.status === 'rejected' ? 'danger' :
+                              decision.status === 'proposed' ? 'warning' : 'info';
             html += `
                 <tr>
                     <td><strong>${escapeHtml(decision.title)}</strong></td>
-                    <td>${escapeHtml(decision.status)}</td>
-                    <td>${decision.decided_date || '-'}</td>
-                    <td>${truncate(stripHtml(decision.context_html), 100)}</td>
+                    <td><span class="monday-status monday-status-${statusClass}">${escapeHtml(decision.status)}</span></td>
+                    <td>${escapeHtml(decision.visibility)}</td>
+                    <td>${decision.published_at ? formatDate(decision.published_at) : 'Not published'}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteDecision('${decision.id}')">Delete</button>
+                        <button class="monday-btn monday-btn-sm monday-btn-danger" onclick="deleteDecision('${decision.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             `;
         });
 
-        html += '</tbody></table></div>';
+        html += '</tbody></table>';
         container.innerHTML = html;
     } catch (error) {
         container.innerHTML = `<p class="error">Error loading decisions: ${error.message}</p>`;
@@ -673,11 +748,25 @@ function hideCreateCelebration() {
 async function createCelebration(e) {
     e.preventDefault();
 
+    const contentText = document.getElementById('celebration-content').value;
+
+    // Convert text to ProseMirror JSON format
+    const content = {
+        type: 'doc',
+        content: [{
+            type: 'paragraph',
+            content: [{
+                type: 'text',
+                text: contentText
+            }]
+        }]
+    };
+
     const data = {
         title: document.getElementById('celebration-title').value,
-        message_html: document.getElementById('celebration-message').value,
-        type: document.getElementById('celebration-type').value,
-        celebrated_date: document.getElementById('celebration-celebrated-date').value || null
+        message: content,
+        celebration_type: document.getElementById('celebration-type').value,
+        visibility: document.getElementById('celebration-visibility').value
     };
 
     try {
@@ -699,27 +788,31 @@ async function loadCelebrations() {
         const celebrations = await api.listCelebrations();
 
         if (!celebrations || celebrations.length === 0) {
-            container.innerHTML = '<p>No celebrations found.</p>';
+            container.innerHTML = '<div class="monday-empty-state"><p>No celebrations found.</p></div>';
             return;
         }
 
-        let html = '<div class="table-responsive"><table class="table table-striped table-hover"><thead class="table-dark"><tr><th>Title</th><th>Type</th><th>Date</th><th>Message</th><th>Actions</th></tr></thead><tbody>';
+        let html = '<table class="monday-table"><thead><tr><th>Title</th><th>Type</th><th>Status</th><th>Visibility</th><th>Published</th><th>Actions</th></tr></thead><tbody>';
 
         celebrations.forEach(celebration => {
+            const statusClass = celebration.status === 'published' ? 'success' : celebration.status === 'draft' ? 'warning' : 'info';
             html += `
                 <tr>
                     <td><strong>${escapeHtml(celebration.title)}</strong></td>
-                    <td>${escapeHtml(celebration.type)}</td>
-                    <td>${celebration.celebrated_date || '-'}</td>
-                    <td>${truncate(stripHtml(celebration.message_html), 100)}</td>
+                    <td><span class="monday-status monday-status-info">${escapeHtml(celebration.celebration_type)}</span></td>
+                    <td><span class="monday-status monday-status-${statusClass}">${escapeHtml(celebration.status)}</span></td>
+                    <td>${escapeHtml(celebration.visibility)}</td>
+                    <td>${celebration.published_at ? formatDate(celebration.published_at) : 'Not published'}</td>
                     <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCelebration('${celebration.id}')">Delete</button>
+                        <button class="monday-btn monday-btn-sm monday-btn-danger" onclick="deleteCelebration('${celebration.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
                     </td>
                 </tr>
             `;
         });
 
-        html += '</tbody></table></div>';
+        html += '</tbody></table>';
         container.innerHTML = html;
     } catch (error) {
         container.innerHTML = `<p class="error">Error loading celebrations: ${error.message}</p>`;
